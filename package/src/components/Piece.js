@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDrag } from 'react-dnd';
-import { getEmptyImage } from 'react-dnd-html5-backend';
 
 import { useChessboard } from '../context/chessboard-context';
 
-export function Piece({ piece, square, squares, isPremovedPiece = false }) {
+export function Piece({ pieceView, piece, square, squares, isPremovedPiece = false }) {
   const {
     animationDuration,
     arePiecesDraggable,
@@ -16,8 +15,6 @@ export function Piece({ piece, square, squares, isPremovedPiece = false }) {
     onPieceDragBegin,
     onPieceDragEnd,
     premoves,
-    chessPieces,
-    dropTarget,
     positionDifferences,
     waitingForAnimation,
     currentPosition
@@ -30,7 +27,7 @@ export function Piece({ piece, square, squares, isPremovedPiece = false }) {
     cursor: arePiecesDraggable && isDraggablePiece({ piece, sourceSquare: square }) ? '-webkit-grab' : 'default'
   });
 
-  const [{ canDrag, isDragging }, drag, dragPreview] = useDrag(
+  const [{ canDrag, isDragging }, drag] = useDrag(
     () => ({
       type: 'piece',
       item: () => {
@@ -46,8 +43,6 @@ export function Piece({ piece, square, squares, isPremovedPiece = false }) {
     [piece, square, currentPosition, id]
   );
 
-  // hide the default preview
-  dragPreview(getEmptyImage(), { captureDraggingState: true });
 
   // hide piece on drag
   useEffect(() => {
@@ -141,19 +136,7 @@ export function Piece({ piece, square, squares, isPremovedPiece = false }) {
       onClick={() => onPieceClick(piece)}
       style={pieceStyle}
     >
-      {typeof chessPieces[piece] === 'function' ? (
-        chessPieces[piece]({
-          squareWidth: boardWidth / 8,
-          isDragging,
-          droppedPiece: dropTarget?.piece,
-          targetSquare: dropTarget?.target,
-          sourceSquare: dropTarget?.source
-        })
-      ) : (
-        <svg viewBox={'1 1 43 43'} width={boardWidth / 8} height={boardWidth / 8}>
-          <g>{chessPieces[piece]}</g>
-        </svg>
-      )}
+      {pieceView}
     </div>
   );
 }

@@ -135,7 +135,6 @@ export const ChessboardProvider = forwardRef(
             // position === start, likely a board reset
             setLastPieceColour(undefined);
           }
-          setPositionDifferences(differences);
 
           // animate external move
           setWaitingForAnimation(true);
@@ -147,6 +146,8 @@ export const ChessboardProvider = forwardRef(
           setPreviousTimeout(newTimeout);
         }
       }
+
+      setPositionDifferences(differences);
 
       // reset manual drop, ready for next move to be made by user or external
       setManualDrop(false);

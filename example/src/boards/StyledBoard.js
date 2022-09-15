@@ -26,7 +26,7 @@ export default function StyledBoard({ boardWidth }) {
     return move;
   }
 
-  const pieces = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK'];
+  const pieces = ['f1', 'c1'];
   const customPieces = () => {
     const returnPieces = {};
     pieces.map((p) => {
@@ -35,7 +35,7 @@ export default function StyledBoard({ boardWidth }) {
           style={{
             width: squareWidth,
             height: squareWidth,
-            backgroundImage: `url(/media/${p}.png)`,
+            backgroundImage: `url('https://i.pinimg.com/originals/21/aa/d1/21aad19aa71144648bb0a0deea1d3057.png')`,
             backgroundSize: '100%',
           }}
         />

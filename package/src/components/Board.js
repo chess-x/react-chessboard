@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useRef, useEffect } from 'react';
+import React, { Fragment, useState, useRef, useEffect, useCallback } from 'react';
 
 import { getRelativeCoords } from '../functions';
 import { Notation } from './Notation';
@@ -7,6 +7,8 @@ import { Square } from './Square';
 import { Squares } from './Squares';
 import { useChessboard } from '../context/chessboard-context';
 import { WhiteKing } from './ErrorBoundary';
+
+let pieceViews = {};
 
 export function Board() {
   const boardRef = useRef();
@@ -20,10 +22,15 @@ export function Board() {
     customArrowColor,
     showBoardNotation,
     currentPosition,
-    premoves
+    premoves,
+    dropTarget,
+    chessPieces,
+    positionDifferences,
   } = useChessboard();
 
   useEffect(() => {
+    pieceViews = {};
+
     function handleClickOutside(event) {
       if (boardRef.current && !boardRef.current.contains(event.target)) {
         clearCurrentRightClickDown();
@@ -36,12 +43,49 @@ export function Board() {
     };
   }, []);
 
+  const definePreview = useCallback((chessPieces, square) => {
+    let pieceView = (
+      <svg viewBox={'1 1 43 43'} width={boardWidth / 8} height={boardWidth / 8}>
+        <g>{chessPieces[square]}</g>
+      </svg>
+    );
+
+    if (typeof chessPieces[square] === 'function') {
+      pieceView = chessPieces[square]({
+        squareWidth: boardWidth / 8,
+        droppedPiece: dropTarget?.piece,
+        targetSquare: dropTarget?.target,
+        sourceSquare: dropTarget?.source
+      })
+    }
+
+    return pieceView;
+  }, [boardWidth, dropTarget]);
+
   return boardWidth ? (
     <div ref={boardRef} style={{ position: 'relative' }}>
       <Squares>
-        {({ square, squareColor, col, row }) => {
+        {({ index, square, squareColor, col, row }) => {
           const squareHasPremove = premoves.find((p) => p.sourceSq === square || p.targetSq === square);
           const squareHasPremoveTarget = premoves.find((p) => p.targetSq === square);
+          const previewIndexKey = `${index}_${square}`;
+          const pieceView = definePreview(chessPieces, square);
+
+          if (!pieceViews[previewIndexKey]) {
+            pieceViews[previewIndexKey] = pieceView;
+          }
+
+          const { added, removed } = positionDifferences;
+          const removedKeys = removed ? Object.keys(removed) : [];
+
+          if (removed && removedKeys.length > 0 && added) {
+            const addedKey = Object.keys(added)[0];
+            const keyToUpdate = `${index}_${addedKey}`;
+            const prevKeyToFind = removedKeys.filter(key => key != addedKey);
+            const prevKey = Object.keys(pieceViews).find(k => k.split("_")[1] == prevKeyToFind);
+
+            pieceViews[keyToUpdate] = pieceViews[prevKey];
+          }
           return (
             <Square
               key={`${col}${row}`}
@@ -50,9 +94,9 @@ export function Board() {
               setSquares={setSquares}
               squareHasPremove={squareHasPremove}
             >
-              {currentPosition[square] && <Piece piece={currentPosition[square]} square={square} squares={squares} />}
+              {currentPosition[square] && <Piece pieceView={pieceViews[previewIndexKey]} piece={currentPosition[square]} square={square} squares={squares} />}
               {squareHasPremoveTarget && (
-                <Piece isPremovedPiece={true} piece={squareHasPremoveTarget.piece} square={square} squares={squares} />
+                <Piece pieceView={pieceViews[previewIndexKey]} isPremovedPiece={true} piece={squareHasPremoveTarget.piece} square={square} squares={squares} />
               )}
               {showBoardNotation && <Notation row={row} col={col} />}
             </Square>

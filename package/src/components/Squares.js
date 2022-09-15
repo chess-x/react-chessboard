@@ -4,6 +4,7 @@ import { COLUMNS } from '../consts';
 import { useChessboard } from '../context/chessboard-context';
 
 export function Squares({ children }) {
+  let uniqIndex = 0;
   const { boardOrientation, boardWidth, customBoardStyle, id } = useChessboard();
 
   return (
@@ -13,9 +14,10 @@ export function Squares({ children }) {
           <div key={r.toString()} style={rowStyles(boardWidth)}>
             {[...Array(8)].map((_, c) => {
               // a1, a2 ...
+              uniqIndex++;
               const square = boardOrientation === 'black' ? COLUMNS[7 - c] + (r + 1) : COLUMNS[c] + (8 - r);
               const squareColor = c % 2 === r % 2 ? 'white' : 'black';
-              return children({ square, squareColor, col: c, row: r });
+              return children({ index: uniqIndex, square, squareColor, col: c, row: r });
             })}
           </div>
         );
