@@ -83,6 +83,14 @@ export type CustomPieces = {
   [key in Pieces]?: CustomPieceFn;
 };
 
+export type CustomPiecesPositionObject = {
+  [key in Square]?: CustomPieceFn;
+};
+
+export type CustomPiecesPosition = {
+  [key in Pieces]?: CustomPiecesPositionObject;
+};
+
 export type CustomSquareStyles = {
   [key in Square]?: CSSProperties;
 };
@@ -156,6 +164,10 @@ export interface ChessBoardProps {
    * Custom pieces object where each key must match a corresponding chess piece (wP, wB, wN, wR, wQ, wK, bP, bB, bN, bR, bQ, bK). The value of each piece is a function that takes in some optional arguments to use and must return JSX to render. e.g. { wK: ({ isDragging: boolean, squareWidth: number, droppedPiece: string, targetSquare: string, sourceSquare: string }) => jsx }.
    */
   customPieces?: CustomPieces;
+  /**
+   * Custom pieces position object where each key must match a corresponding chess piece (wP, wB, wN, wR, wQ, wK, bP, bB, bN, bR, bQ, bK). The value of each piece is again a object where each key must match a corresponding chess board position (a1,a2,...,a8,b1,...,h7,h8). The value of each position is a function that takes in some optional arguments to use and must return JSX to render. e.g. { wK: ({ isDragging: boolean, squareWidth: number, droppedPiece: string, targetSquare: string, sourceSquare: string }) => jsx }.
+   */
+  customPiecesPosition?: CustomPiecesPosition;
   /**
    * Custom premove dark square style object.
    */
