@@ -35,6 +35,7 @@ export const ChessboardProvider = forwardRef(
       customDropSquareStyle,
       customLightSquareStyle,
       customPieces,
+      customPiecesPosition,
       customPremoveDarkSquareStyle,
       customPremoveLightSquareStyle,
       customSquareStyles,
@@ -79,7 +80,13 @@ export const ChessboardProvider = forwardRef(
     const [arrows, setArrows] = useState([]);
 
     // chess pieces/styling
-    const [chessPieces, setChessPieces] = useState({ ...defaultPieces, ...customPieces });
+    const [chessPieces, setChessPieces] = useState({ ...defaultPieces });
+
+    // custom chess pieces/styling
+    const [customChessPieces, setCustomChessPieces] = useState({ ...customPieces });
+
+    // custom chess pieces/styling based on position
+    const [customChessPiecesPosition, setCustomChessPiecesPosition] = useState(customPiecesPosition);
 
     // whether the last move was a manual drop or not
     const [manualDrop, setManualDrop] = useState(false);
@@ -99,7 +106,7 @@ export const ChessboardProvider = forwardRef(
 
     // handle custom pieces change
     useEffect(() => {
-      setChessPieces({ ...defaultPieces, ...customPieces });
+      setCustomChessPieces({ ...customPieces });
     }, [customPieces]);
 
     // handle external position change
@@ -108,6 +115,23 @@ export const ChessboardProvider = forwardRef(
       const differences = getPositionDifferences(currentPosition, newPosition);
       const newPieceColour =
         Object.keys(differences.added)?.length <= 2 ? Object.entries(differences.added)?.[0]?.[1][0] : undefined;
+
+      const removedPiece = Object.keys(differences.removed).map((key) => [key, differences.removed[key]]);
+      const addedPosition = Object.keys(differences.added).map((key) => [key, differences.added[key]]);
+
+      if (removedPiece.length) {
+        const newPositionChessPieces = { ...customChessPiecesPosition };
+        removedPiece.forEach((obj) => {
+          if (newPositionChessPieces[obj[1]] && newPositionChessPieces[obj[1]][obj[0]]) {
+            const newAddPosition = addedPosition.find((ele) => ele[1] === obj[1]);
+            if (newAddPosition) {
+              newPositionChessPieces[obj[1]][newAddPosition[0]] = newPositionChessPieces[obj[1]][obj[0]];
+            }
+            delete newPositionChessPieces[obj[1]][obj[0]];
+          }
+        });
+        setCustomChessPiecesPosition(newPositionChessPieces);
+      }
 
       // external move has come in before animation is over
       // cancel animation and immediately update position
@@ -333,6 +357,8 @@ export const ChessboardProvider = forwardRef(
 
           arrows,
           chessPieces,
+          customChessPieces,
+          customChessPiecesPosition,
           clearArrows,
           clearCurrentRightClickDown,
           clearPremoves,

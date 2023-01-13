@@ -17,6 +17,7 @@ export const chessboardDefaultProps = {
   customDropSquareStyle: { boxShadow: 'inset 0 0 1px 6px rgba(255,255,255,0.75)' },
   customLightSquareStyle: { backgroundColor: '#F0D9B5' },
   customPieces: {},
+  customPiecesPosition: {},
   customPremoveDarkSquareStyle: { backgroundColor: '#A42323' },
   customPremoveLightSquareStyle: { backgroundColor: '#BD2828' },
   customSquareStyles: {},

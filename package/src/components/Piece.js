@@ -17,6 +17,8 @@ export function Piece({ piece, square, squares, isPremovedPiece = false }) {
     onPieceDragEnd,
     premoves,
     chessPieces,
+    customChessPieces,
+    customChessPiecesPosition,
     dropTarget,
     positionDifferences,
     waitingForAnimation,
@@ -135,25 +137,43 @@ export function Piece({ piece, square, squares, isPremovedPiece = false }) {
     };
   }
 
+  const renderPiece = () => {
+    if (
+      customChessPiecesPosition[piece] &&
+      customChessPiecesPosition[piece][square] &&
+      typeof customChessPiecesPosition[piece][square] === 'function'
+    ) {
+      return customChessPiecesPosition[piece][square]({
+        squareWidth: boardWidth / 8,
+        isDragging,
+        droppedPiece: dropTarget?.piece,
+        targetSquare: dropTarget?.target,
+        sourceSquare: dropTarget?.source
+      });
+    }
+    if (typeof customChessPieces[piece] === 'function') {
+      return customChessPieces[piece]({
+        squareWidth: boardWidth / 8,
+        isDragging,
+        droppedPiece: dropTarget?.piece,
+        targetSquare: dropTarget?.target,
+        sourceSquare: dropTarget?.source
+      });
+    }
+    return (
+      <svg viewBox={'1 1 43 43'} width={boardWidth / 8} height={boardWidth / 8}>
+        <g>{chessPieces[piece]}</g>
+      </svg>
+    );
+  };
+
   return (
     <div
       ref={arePiecesDraggable ? (canDrag ? drag : null) : null}
       onClick={() => onPieceClick(piece)}
       style={pieceStyle}
     >
-      {typeof chessPieces[piece] === 'function' ? (
-        chessPieces[piece]({
-          squareWidth: boardWidth / 8,
-          isDragging,
-          droppedPiece: dropTarget?.piece,
-          targetSquare: dropTarget?.target,
-          sourceSquare: dropTarget?.source
-        })
-      ) : (
-        <svg viewBox={'1 1 43 43'} width={boardWidth / 8} height={boardWidth / 8}>
-          <g>{chessPieces[piece]}</g>
-        </svg>
-      )}
+      {renderPiece()}
     </div>
   );
 }
