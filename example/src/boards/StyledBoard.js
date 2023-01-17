@@ -29,7 +29,7 @@ export default function StyledBoard({ boardWidth }) {
   const pieces = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK'];
   const customPieces = () => {
     const returnPieces = {};
-    pieces.map((p) => {
+    pieces.forEach((p) => {
       returnPieces[p] = ({ squareWidth }) => (
         <div
           style={{
@@ -40,7 +40,6 @@ export default function StyledBoard({ boardWidth }) {
           }}
         />
       );
-      return null;
     });
     return returnPieces;
   };
@@ -86,9 +85,8 @@ export default function StyledBoard({ boardWidth }) {
 
   const customPiecesPosition = () => {
     const returnPieces = {}
-    piecesPosition.map(p => {
+    piecesPosition.forEach(p => {
       returnPieces[p.piece] = renderPiece(p.positionURL)
-      return null
     })
     return returnPieces
   }

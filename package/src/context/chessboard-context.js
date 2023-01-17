@@ -80,10 +80,10 @@ export const ChessboardProvider = forwardRef(
     const [arrows, setArrows] = useState([]);
 
     // chess pieces/styling
-    const [chessPieces, setChessPieces] = useState({ ...defaultPieces });
+    const [chessPieces, setChessPieces] = useState(defaultPieces);
 
     // custom chess pieces/styling
-    const [customChessPieces, setCustomChessPieces] = useState({ ...customPieces });
+    const [customChessPieces, setCustomChessPieces] = useState(customPieces);
 
     // custom chess pieces/styling based on position
     const [customChessPiecesPosition, setCustomChessPiecesPosition] = useState(customPiecesPosition);
@@ -106,7 +106,7 @@ export const ChessboardProvider = forwardRef(
 
     // handle custom pieces change
     useEffect(() => {
-      setCustomChessPieces({ ...customPieces });
+      setCustomChessPieces(customPieces);
     }, [customPieces]);
 
     // handle external position change
