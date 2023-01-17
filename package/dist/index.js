@@ -5901,11 +5901,9 @@ const ChessboardProvider = /*#__PURE__*/React.forwardRef(({
 
   const [arrows, setArrows] = React.useState([]); // chess pieces/styling
 
-  const [chessPieces, setChessPieces] = React.useState({ ...defaultPieces
-  }); // custom chess pieces/styling
+  const [chessPieces, setChessPieces] = React.useState(defaultPieces); // custom chess pieces/styling
 
-  const [customChessPieces, setCustomChessPieces] = React.useState({ ...customPieces
-  }); // custom chess pieces/styling based on position
+  const [customChessPieces, setCustomChessPieces] = React.useState(customPieces); // custom chess pieces/styling based on position
 
   const [customChessPiecesPosition, setCustomChessPiecesPosition] = React.useState(customPiecesPosition); // whether the last move was a manual drop or not
 
@@ -5923,8 +5921,7 @@ const ChessboardProvider = /*#__PURE__*/React.forwardRef(({
   })); // handle custom pieces change
 
   React.useEffect(() => {
-    setCustomChessPieces({ ...customPieces
-    });
+    setCustomChessPieces(customPieces);
   }, [customPieces]); // handle external position change
 
   React.useEffect(() => {
