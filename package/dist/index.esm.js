@@ -4995,6 +4995,7 @@ const chessboardDefaultProps = {
     backgroundColor: '#F0D9B5'
   },
   customPieces: {},
+  customPiecesPosition: {},
   customPremoveDarkSquareStyle: {
     backgroundColor: '#A42323'
   },
@@ -5853,6 +5854,7 @@ const ChessboardProvider = /*#__PURE__*/forwardRef(({
   customDropSquareStyle,
   customLightSquareStyle,
   customPieces,
+  customPiecesPosition,
   customPremoveDarkSquareStyle,
   customPremoveLightSquareStyle,
   customSquareStyles,
@@ -5891,9 +5893,11 @@ const ChessboardProvider = /*#__PURE__*/forwardRef(({
 
   const [arrows, setArrows] = useState([]); // chess pieces/styling
 
-  const [chessPieces, setChessPieces] = useState({ ...defaultPieces,
-    ...customPieces
-  }); // whether the last move was a manual drop or not
+  const [chessPieces, setChessPieces] = useState(defaultPieces); // custom chess pieces/styling
+
+  const [customChessPieces, setCustomChessPieces] = useState(customPieces); // custom chess pieces/styling based on position
+
+  const [customChessPiecesPosition, setCustomChessPiecesPosition] = useState(customPiecesPosition); // whether the last move was a manual drop or not
 
   const [manualDrop, setManualDrop] = useState(false); // the most recent timeout whilst waiting for animation to complete
 
@@ -5909,9 +5913,7 @@ const ChessboardProvider = /*#__PURE__*/forwardRef(({
   })); // handle custom pieces change
 
   useEffect(() => {
-    setChessPieces({ ...defaultPieces,
-      ...customPieces
-    });
+    setCustomChessPieces(customPieces);
   }, [customPieces]); // handle external position change
 
   useEffect(() => {
@@ -5919,8 +5921,28 @@ const ChessboardProvider = /*#__PURE__*/forwardRef(({
 
     const newPosition = convertPositionToObject(position);
     const differences = getPositionDifferences(currentPosition, newPosition);
-    const newPieceColour = ((_Object$keys = Object.keys(differences.added)) === null || _Object$keys === void 0 ? void 0 : _Object$keys.length) <= 2 ? (_Object$entries = Object.entries(differences.added)) === null || _Object$entries === void 0 ? void 0 : (_Object$entries$ = _Object$entries[0]) === null || _Object$entries$ === void 0 ? void 0 : _Object$entries$[1][0] : undefined; // external move has come in before animation is over
+    const newPieceColour = ((_Object$keys = Object.keys(differences.added)) === null || _Object$keys === void 0 ? void 0 : _Object$keys.length) <= 2 ? (_Object$entries = Object.entries(differences.added)) === null || _Object$entries === void 0 ? void 0 : (_Object$entries$ = _Object$entries[0]) === null || _Object$entries$ === void 0 ? void 0 : _Object$entries$[1][0] : undefined;
+    const removedPiece = Object.keys(differences.removed).map(key => [key, differences.removed[key]]);
+    const addedPosition = Object.keys(differences.added).map(key => [key, differences.added[key]]);
+
+    if (removedPiece.length) {
+      const newPositionChessPieces = { ...customChessPiecesPosition
+      };
+      removedPiece.forEach(obj => {
+        if (newPositionChessPieces[obj[1]] && newPositionChessPieces[obj[1]][obj[0]]) {
+          const newAddPosition = addedPosition.find(ele => ele[1] === obj[1]);
+
+          if (newAddPosition) {
+            newPositionChessPieces[obj[1]][newAddPosition[0]] = newPositionChessPieces[obj[1]][obj[0]];
+          }
+
+          delete newPositionChessPieces[obj[1]][obj[0]];
+        }
+      });
+      setCustomChessPiecesPosition(newPositionChessPieces);
+    } // external move has come in before animation is over
     // cancel animation and immediately update position
+
 
     if (waitingForAnimation) {
       setCurrentPosition(newPosition);
@@ -6134,6 +6156,8 @@ const ChessboardProvider = /*#__PURE__*/forwardRef(({
       snapToCursor,
       arrows,
       chessPieces,
+      customChessPieces,
+      customChessPiecesPosition,
       clearArrows,
       clearCurrentRightClickDown,
       clearPremoves,
@@ -6276,6 +6300,8 @@ function Piece({
     onPieceDragEnd,
     premoves,
     chessPieces,
+    customChessPieces,
+    customChessPiecesPosition,
     dropTarget,
     positionDifferences,
     waitingForAnimation,
@@ -6400,24 +6426,42 @@ function Piece({
     };
   }
 
-  return /*#__PURE__*/jsx("div", {
-    ref: arePiecesDraggable ? canDrag ? drag : null : null,
-    onClick: () => onPieceClick(piece),
-    style: pieceStyle,
-    children: typeof chessPieces[piece] === 'function' ? chessPieces[piece]({
-      squareWidth: boardWidth / 8,
-      isDragging,
-      droppedPiece: dropTarget === null || dropTarget === void 0 ? void 0 : dropTarget.piece,
-      targetSquare: dropTarget === null || dropTarget === void 0 ? void 0 : dropTarget.target,
-      sourceSquare: dropTarget === null || dropTarget === void 0 ? void 0 : dropTarget.source
-    }) : /*#__PURE__*/jsx("svg", {
+  const renderPiece = () => {
+    if (customChessPiecesPosition[piece] && customChessPiecesPosition[piece][square] && typeof customChessPiecesPosition[piece][square] === 'function') {
+      return customChessPiecesPosition[piece][square]({
+        squareWidth: boardWidth / 8,
+        isDragging,
+        droppedPiece: dropTarget === null || dropTarget === void 0 ? void 0 : dropTarget.piece,
+        targetSquare: dropTarget === null || dropTarget === void 0 ? void 0 : dropTarget.target,
+        sourceSquare: dropTarget === null || dropTarget === void 0 ? void 0 : dropTarget.source
+      });
+    }
+
+    if (typeof customChessPieces[piece] === 'function') {
+      return customChessPieces[piece]({
+        squareWidth: boardWidth / 8,
+        isDragging,
+        droppedPiece: dropTarget === null || dropTarget === void 0 ? void 0 : dropTarget.piece,
+        targetSquare: dropTarget === null || dropTarget === void 0 ? void 0 : dropTarget.target,
+        sourceSquare: dropTarget === null || dropTarget === void 0 ? void 0 : dropTarget.source
+      });
+    }
+
+    return /*#__PURE__*/jsx("svg", {
       viewBox: '1 1 43 43',
       width: boardWidth / 8,
       height: boardWidth / 8,
       children: /*#__PURE__*/jsx("g", {
         children: chessPieces[piece]
       })
-    })
+    });
+  };
+
+  return /*#__PURE__*/jsx("div", {
+    ref: arePiecesDraggable ? canDrag ? drag : null : null,
+    onClick: () => onPieceClick(piece),
+    style: pieceStyle,
+    children: renderPiece()
   });
 }
 
@@ -6783,6 +6827,8 @@ function CustomDragLayer() {
   const {
     boardWidth,
     chessPieces,
+    customChessPieces,
+    customChessPiecesPosition,
     id,
     snapToCursor
   } = useChessboard();
@@ -6827,21 +6873,37 @@ function CustomDragLayer() {
       touchAction: 'none'
     };
   }, [boardWidth, snapToCursor]);
+
+  const renderPiece = () => {
+    if (customChessPiecesPosition[item.piece] && customChessPiecesPosition[item.piece][item.square] && typeof customChessPiecesPosition[item.piece][item.square] === 'function') {
+      return customChessPiecesPosition[item.piece][item.square]({
+        squareWidth: boardWidth / 8,
+        isDragging: true
+      });
+    }
+
+    if (typeof customChessPieces[item.piece] === 'function') {
+      return customChessPieces[item.piece]({
+        squareWidth: boardWidth / 8,
+        isDragging: true
+      });
+    }
+
+    return /*#__PURE__*/jsx("svg", {
+      viewBox: '1 1 43 43',
+      width: boardWidth / 8,
+      height: boardWidth / 8,
+      children: /*#__PURE__*/jsx("g", {
+        children: chessPieces[item.piece]
+      })
+    });
+  };
+
   return isDragging && item.id === id ? /*#__PURE__*/jsx("div", {
     style: layerStyles,
     children: /*#__PURE__*/jsx("div", {
       style: getItemStyle(clientOffset, sourceClientOffset),
-      children: typeof chessPieces[item.piece] === 'function' ? chessPieces[item.piece]({
-        squareWidth: boardWidth / 8,
-        isDragging: true
-      }) : /*#__PURE__*/jsx("svg", {
-        viewBox: '1 1 43 43',
-        width: boardWidth / 8,
-        height: boardWidth / 8,
-        children: /*#__PURE__*/jsx("g", {
-          children: chessPieces[item.piece]
-        })
-      })
+      children: renderPiece()
     })
   }) : null;
 }

@@ -29,7 +29,7 @@ export default function StyledBoard({ boardWidth }) {
   const pieces = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK'];
   const customPieces = () => {
     const returnPieces = {};
-    pieces.map((p) => {
+    pieces.forEach((p) => {
       returnPieces[p] = ({ squareWidth }) => (
         <div
           style={{
@@ -40,10 +40,56 @@ export default function StyledBoard({ boardWidth }) {
           }}
         />
       );
-      return null;
     });
     return returnPieces;
   };
+
+  const piecesPosition = [
+    {
+      piece: 'bP',
+      positionURL: {
+        h7: `url(/media/custom/bP.png)`
+      }
+    },
+    {
+      piece: 'wP',
+      positionURL: {
+        b2: `url(/media/custom/wP.png)`,
+        f2: `url(/media/custom/wP_1.png)`
+      }
+    },
+    {
+      piece: 'wB',
+      positionURL: {
+        c1: `url(/media/custom/wB.png)`
+      }
+    }
+  ]
+
+  const renderPiece = positionURL => {
+    const renderObject = {}
+    Object.keys(positionURL).forEach(ele => {
+      renderObject[ele] = ({ squareWidth }) => (
+        <div
+          style={{
+            width: squareWidth,
+            height: squareWidth,
+            backgroundImage: positionURL[ele],
+            backgroundSize: '100%',
+          }}
+        />
+      )
+    })
+    return renderObject
+  }
+
+  const customPiecesPosition = () => {
+    const returnPieces = {}
+    piecesPosition.forEach(p => {
+      returnPieces[p.piece] = renderPiece(p.positionURL)
+    })
+    return returnPieces
+  }
 
   return (
     <div>
@@ -61,6 +107,7 @@ export default function StyledBoard({ boardWidth }) {
         customDarkSquareStyle={{ backgroundColor: '#779952' }}
         customLightSquareStyle={{ backgroundColor: '#edeed1' }}
         customPieces={customPieces()}
+        customPiecesPosition={customPiecesPosition()}
         ref={chessboardRef}
       />
       <button
